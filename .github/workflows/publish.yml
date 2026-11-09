@@ -17,6 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
+
       - name: Verify tag and changelog
         env:
           RELEASE_TAG: ${{ github.ref_name }}
@@ -35,24 +36,42 @@ jobs:
             throw new Error(`CHANGELOG.md must include ## [${packageJson.version}]`);
           }
           NODE
+
       - name: Run package checks
         run: yarn check
+
       - name: Verify packed consumer
         run: bash scripts/smoke-consumer.sh
+
       - name: Install npm with trusted publishing support
         run: npm install --global 'npm@^11.5.1'
-      - name: Configure npm registry
-        uses: actions/setup-node@v7
+
+      # 1. Configure and Publish to official npmjs.com using OIDC
+      - name: Setup Node for npmjs.com
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          registry-url: https://registry.npmjs.org
+          registry-url: 'https://registry.npmjs.org'
           scope: '@xkid1'
-      - name: Publish to npm
-        run: npm publish --registry=https://registry.npmjs.org --access public
+
+      - name: Publish to npm (via OIDC)
+        run: npm publish --access public
+        # NODE_AUTH_TOKEN is automatically provided by actions/setup-node using OIDC
+
+      # 2. Re-configure and Publish to GitHub Packages using GITHUB_TOKEN
+      - name: Setup Node for GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@xkid1'
+
       - name: Publish to GitHub Packages
+        run: yarn npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn npm publish
+
+      # 3. Create GitHub Release
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
