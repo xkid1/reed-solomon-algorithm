@@ -135,7 +135,12 @@ console.log(bytesToHex(bytes)); // 48656c6c6f
 Use Node.js `>=26.13.0` and Yarn `4.18.0` via Corepack.
 
 ```sh
+if ! command -v corepack >/dev/null 2>&1; then
+  npm install --global corepack
+fi
 corepack enable
+corepack install
+yarn --version
 yarn install --immutable
 ```
 
