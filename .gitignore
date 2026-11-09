@@ -1,0 +1,50 @@
+yarn-debug.log*
+yarn-error.log*
+# Dependencies and local package-manager state
+/node_modules/
+/.yarn/
+/.npmrc
+/.yarnrc
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Build and test output
+/dist/
+/build/
+/coverage/
+/tmp/
+/out-tsc/
+/bazel-out/
+*.tsbuildinfo
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.scannerwork
+.vs/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+# Visual Studio Code
+.vscode/*
+.history/*
+
+# Miscellaneous
+.DS_Store
+

@@ -1,0 +1,18 @@
+name: Question or other request
+description: Ask a question or raise something not covered by the other forms.
+title: '[Question]: '
+labels:
+  - question
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What would you like help with?
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Add relevant context, code samples, or links.

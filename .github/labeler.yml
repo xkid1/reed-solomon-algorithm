@@ -1,0 +1,27 @@
+'source':
+  - changed-files:
+      - any-glob-to-any-file: 'src/**/*.ts'
+
+'tests':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/**/*.test.ts'
+          - 'test/**/*.ts'
+
+'ci':
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**'
+          - '.github/actions/**'
+
+'documentation':
+  - changed-files:
+      - any-glob-to-any-file: '**/*.md'
+
+'tooling':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'yarn.lock'
+          - 'tsconfig*.json'
+          - '.yarnrc.yml'

@@ -1,0 +1,23 @@
+name: Code conventions
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  conventions:
+    name: Format, lint, and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Check formatting
+        run: yarn format:check
+      - name: Lint
+        run: yarn lint
+      - name: Type-check
+        run: yarn typecheck

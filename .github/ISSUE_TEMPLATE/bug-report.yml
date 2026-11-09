@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a reproducible defect in the library.
+title: '[Bug]: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Before submitting, please check whether this issue has already been reported.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: Which version of @xkid1/reed-solomon-algorithm are you using?
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include a minimal code sample and input data.
+      render: typescript
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Runtime and environment
+      description: Include the Node.js version and operating system.

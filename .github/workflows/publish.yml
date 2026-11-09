@@ -1,0 +1,65 @@
+name: Publish package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
+jobs:
+  publish:
+    name: Publish to npm and GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Verify tag and changelog
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+
+          const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
+          const releaseTag = process.env.RELEASE_TAG;
+          if (releaseTag !== `v${packageJson.version}`) {
+            throw new Error(`Release tag ${releaseTag} must match v${packageJson.version}`);
+          }
+
+          const changelog = readFileSync('CHANGELOG.md', 'utf8');
+          if (!changelog.includes(`## [${packageJson.version}]`)) {
+            throw new Error(`CHANGELOG.md must include ## [${packageJson.version}]`);
+          }
+          NODE
+      - name: Run package checks
+        run: yarn check
+      - name: Verify packed consumer
+        run: bash scripts/smoke-consumer.sh
+      - name: Install npm with trusted publishing support
+        run: npm install --global 'npm@^11.5.1'
+      - name: Configure npm registry
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+          scope: '@xkid1'
+      - name: Publish to npm
+        run: npm publish --registry=https://registry.npmjs.org --access public
+      - name: Publish to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: yarn npm publish
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists."
+          else
+            gh release create "$RELEASE_TAG" --generate-notes --verify-tag
+          fi

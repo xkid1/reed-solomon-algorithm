@@ -1,0 +1,20 @@
+name: Setup Node and Yarn
+description:
+  Set up the repository's pinned Node and Yarn toolchain and install dependencies.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: yarn
+    - name: Enable Corepack
+      shell: bash
+      run: |
+        npm install --global corepack
+        corepack enable
+    - name: Install dependencies
+      shell: bash
+      env:
+        NODE_AUTH_TOKEN: ${{ github.token }}
+      run: yarn install --immutable
