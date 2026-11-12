@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
   packages: write
 
 jobs:
@@ -43,10 +42,7 @@ jobs:
       - name: Verify packed consumer
         run: bash scripts/smoke-consumer.sh
 
-      - name: Install npm with trusted publishing support
-        run: npm install --global 'npm@^11.5.1'
-
-      # 1. Configure and Publish to official npmjs.com using OIDC
+      # 1. Configure and Publish to official npmjs.com using a repository secret
       - name: Setup Node for npmjs.com
         uses: actions/setup-node@v4
         with:
@@ -54,9 +50,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@xkid1'
 
-      - name: Publish to npm (via OIDC)
+      - name: Publish to npm
         run: npm publish --access public
-        # NODE_AUTH_TOKEN is automatically provided by actions/setup-node using OIDC
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # 2. Re-configure and Publish to GitHub Packages using GITHUB_TOKEN
       - name: Setup Node for GitHub Packages
