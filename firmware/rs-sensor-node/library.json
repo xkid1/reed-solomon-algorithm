@@ -1,0 +1,31 @@
+{
+  "name": "Xkid1_ReedSolomon",
+  "version": "0.1.1",
+  "description": "Optimized Reed-Solomon GF(256) systematic encoder with loop unrolling. Pairs perfectly with the @xkid1/reed-solomon-algorithm npm package.",
+  "keywords": [
+    "communication",
+    "error-correction",
+    "reed-solomon",
+    "iot",
+    "ecc",
+    "embedded",
+    "esp32",
+    "stm32"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xkid1/reed-solomon-algorithm"
+  },
+  "authors": [
+    {
+      "name": "xkid1",
+      "url": "https://github.com"
+    }
+  ],
+  "license": "MIT",
+  "frameworks": "*",
+  "platforms": ["espressif32", "ststm32", "atmelsam", "atmelavr"],
+  "export": {
+    "include": ["src/*", "library.properties"]
+  }
+}
