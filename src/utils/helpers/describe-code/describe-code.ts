@@ -1,5 +1,4 @@
-import { MAX_CODEWORD_LENGTH } from '@libs';
-
+import { MAX_CODEWORD_LENGTH } from '../../../libs/index.js';
 import { ReedSolomonError } from '../errors/errors.js';
 
 import type { CodeDescription } from '../../../types/reed-solomon/reed-solomon.js';
