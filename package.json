@@ -22,6 +22,7 @@
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "tsd": {
     "directory": "./global.d.ts"
@@ -53,9 +54,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "yarn clean && yarn build:js && yarn build:types",
+    "build": "yarn clean && yarn build:js && yarn build:types && yarn build:assets",
     "build:js": "swc src -d dist --strip-leading-paths --ignore \"**/*.test.ts\" \"**/*.spec.ts\"",
     "build:types": "tsc -p tsconfig.build.json",
+    "build:assets": "node -e \"require('node:fs').cpSync('src/html','dist/html',{recursive:true})\"",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -66,7 +68,11 @@
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "check": "yarn format:check && yarn lint && yarn typecheck && yarn coverage && yarn build",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "server:demo": "yarn build && node dist/server.js --demo",
+    "test-iot-loop": "jiti scripts/simulate-hardware.ts",
+    "benchmark": "jiti scripts/benchmark.ts",
+    "build:browser": "yarn build && jiti scripts/build-browser.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

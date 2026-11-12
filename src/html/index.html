@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>Sensor telemetry</title>
+    <style>
+      body {
+        max-width: 48rem;
+        margin: 3rem auto;
+        padding: 0 1rem;
+        color: #172033;
+        font:
+          1rem/1.5 system-ui,
+          sans-serif;
+      }
+
+      li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #d8deea;
+      }
+
+      #connection {
+        color: #526078;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Sensor telemetry</h1>
+    <p id="connection">Connecting to gateway...</p>
+    <ul
+      id="readings"
+      aria-live="polite"
+    ></ul>
+    <script>
+      const connection = document.querySelector('#connection');
+      const readings = document.querySelector('#readings');
+      const events = new EventSource('/events');
+
+      events.onopen = () => {
+        connection.textContent = 'Connected to gateway';
+      };
+      events.onerror = () => {
+        connection.textContent = 'Gateway connection lost; reconnecting...';
+      };
+      events.onmessage = ({ data }) => {
+        const metric = JSON.parse(data);
+        const item = document.createElement('li');
+        item.textContent =
+          `Sensor ${metric.sensorId}: ${metric.temperatureCelsius} °C, ` +
+          `${metric.batteryVoltageMilliVolts} mV (${metric.batteryStatus}), ` +
+          `${metric.linkErrorsCorrected} corrected errors`;
+        readings.prepend(item);
+        while (readings.children.length > 10) readings.lastElementChild.remove();
+      };
+    </script>
+  </body>
+</html>
