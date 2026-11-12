@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing version tag to finalize after npm approval
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -11,15 +17,17 @@ permissions:
 
 jobs:
   publish:
-    name: Publish to npm and GitHub Packages
+    name: Stage npm or finalize release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref }}
       - uses: ./.github/actions/setup
 
       - name: Verify tag and changelog
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
         run: |
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
@@ -42,7 +50,7 @@ jobs:
       - name: Verify packed consumer
         run: bash scripts/smoke-consumer.sh
 
-      # 1. Configure and Publish to official npmjs.com using a repository secret
+      # Tag pushes stage on npm; approval is completed manually in npm.
       - name: Setup Node for npmjs.com
         uses: actions/setup-node@v4
         with:
@@ -50,13 +58,27 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@xkid1'
 
-      - name: Publish to npm
-        run: npm publish --access public
+      - name: Stage on npm
+        if: github.event_name == 'push'
+        run: npm stage publish . --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # 2. Re-configure and Publish to GitHub Packages using GITHUB_TOKEN
+      - name: Verify npm publication
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION=$(node -p "JSON.parse(require('node:fs').readFileSync('package.json', 'utf8')).version")
+          PUBLISHED_VERSION=$(npm view "@xkid1/reed-solomon-algorithm@$VERSION" version \
+            --registry=https://registry.npmjs.org \
+            '--@xkid1:registry=https://registry.npmjs.org')
+          if [ "$PUBLISHED_VERSION" != "$VERSION" ]; then
+            echo "Expected npm version $VERSION, found $PUBLISHED_VERSION."
+            exit 1
+          fi
+
+      # Manual dispatch runs after npm approval and publishes to GitHub Packages.
       - name: Setup Node for GitHub Packages
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -64,15 +86,16 @@ jobs:
           scope: '@xkid1'
 
       - name: Publish to GitHub Packages
+        if: github.event_name == 'workflow_dispatch'
         run: yarn npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 3. Create GitHub Release
       - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
         run: |
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             echo "Release $RELEASE_TAG already exists."
