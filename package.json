@@ -1,6 +1,6 @@
 {
   "name": "@xkid1/reed-solomon-algorithm",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Reed-Solomon algorithm error correction over GF(2^8) in pure TypeScript: encode, decode, correct errors and erasures.",
   "keywords": [
     "reed-solomon",
@@ -51,7 +51,8 @@
     }
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "yarn clean && yarn build:js && yarn build:types && yarn build:assets",
